@@ -13,7 +13,9 @@ struct Claims {
 }
 
 pub fn validate_token(token: &str) -> Result<bool, ServiceError> {
+    println!("HELLO");
     let authority = std::env::var("AUTHORITY").expect("AUTHORITY must be set");
+    println!("{}", authority);
     let jwks = fetch_jwks(&format!(
         "{}{}",
         authority.as_str(),
@@ -28,4 +30,11 @@ pub fn validate_token(token: &str) -> Result<bool, ServiceError> {
     let jwk = jwks.find(&kid).expect("Specified key not found in set");
     let res = validate(token, jwk, validations);
     Ok(res.is_ok())
+}
+
+fn fetch_jwks(uri: &str) -> Result<JWKS, Box<dyn Error>> {
+    let mut res = reqwest::get(uri)?;
+    let val = res.json::<JWKS>()?;
+    println!("Cheese {:?}", val);
+    return Ok(val);
 }
